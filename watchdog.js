@@ -26,7 +26,7 @@ client.getAllData().then(result => {
   sites_prices.set(
     Object.fromEntries(
       result.sites_prices.map((sp) => {
-        const parsedDate = (new Date(sp.TransactionDateUtc)).toTimeString();  //sp.TransactionDateUtc.split(/:|\./).join("-");
+        const parsedDate = (new Date(sp.TransactionDateUtc)).getTime();  //sp.TransactionDateUtc.split(/:|\./).join("-");
         const key = `${sp.FuelId}_${sp.SiteId}_${parsedDate}`;
         return [
           key,
