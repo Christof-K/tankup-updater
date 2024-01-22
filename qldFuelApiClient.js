@@ -78,7 +78,6 @@ const getAllData = () => {
               sitePrices.forEach((sp) => {
                 mergedData.sites_prices.push({
                   ...sp,
-                  TransactionDateTimestamp: new Date(sp.TransactionDateUtc).getTime(),
                   TransactionDateUtc: new Date(sp.TransactionDateUtc),
                 });
               })
