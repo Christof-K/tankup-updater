@@ -60,7 +60,7 @@ const getAllData = () => {
                   PostCode: _site.P, // postcode
                   Lat: _site.Lat,
                   Lng: _site.Lng,
-                  LastModified: _site.M, // last modified - date string
+                  LastModified: new Date(_site.M), // last modified - date string
                   GooglePlaceId: _site.GPI, // google place id
                 });
               });
@@ -74,7 +74,13 @@ const getAllData = () => {
               //   "Price": 1999,
               //   "TransactionDateUtc": "2023-10-30T22:04:14.3"
               // }
-              mergedData.sites_prices.push(...data.SitePrices);
+              const sitePrices = data.SitePrices;
+              sitePrices.forEach((sp) => {
+                mergedData.sites_prices.push({
+                  ...sp,
+                  TransactionDateUtc: new Date(sp.TransactionDateUtc),
+                });
+              })
               break;
             }
           }
