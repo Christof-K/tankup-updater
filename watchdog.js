@@ -36,7 +36,11 @@ client.getAllData().then((result) => {
   });
 
 
-  store.storeCollection("sites", sitesParsed, "SiteId");
+  store.storeCollection("sites", sitesParsed, "SiteId").then(() => {
+
+    console.log("done");
+    return process.exit();
+  })
 
 
   // todo: for chart / history data only
@@ -55,5 +59,7 @@ client.getAllData().then((result) => {
 
   // console.log("INFO", addedInfo)
 
-  console.log("done");
+
+
+
 });
