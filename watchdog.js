@@ -1,46 +1,57 @@
-const admin = require("firebase-admin");
+
 const client = require("./qldFuelApiClient");
-const serviceAccount = require("./serviceAccountKey.json");
-const { getFirestore } = require("firebase-admin/firestore");
-const Firestore = require("@google-cloud/firestore");
 const geofire = require("geofire-common");
+const Store = require("./store")
 
-const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const db = getFirestore(app);
+const dotenv = require("dotenv");
+dotenv.config();
 
 
 
 client.getAllData().then((result) => {
-  const brandsRef = db.collection("brands");
-  result.brands.forEach((brand) => {
-    brandsRef.doc(`${brand.BrandId}`).set(brand);
+  console.log(`store mode - ${process.env.MODE}`);
+  const store = new Store(process.env.MODE);
+
+  store.storeCollection("brands", result.brands, "BrandId");
+  store.storeCollection("fuels", result.fuels, "FuelId");
+
+  const sitesParsed = [];
+  result.sites.forEach((site) => {
+    site.Geohash = geofire.geohashForLocation([site.Lat, site.Lng]);
+    const prices = {};
+    result.sites_prices
+      .filter((sp) => sp.SiteId === site.SiteId)
+      .sort((a, b) =>
+        a.TransactionDate.getTime() < b.TransactionDate.getTime() ? 1 : -1
+      )
+      .forEach((sp) => {
+        if (!prices[sp.FuelId]) {
+          prices[sp.FuelId] = sp;
+        }
+      });
+
+
+    site.Prices = prices;
+    sitesParsed.push(site);
   });
 
-  const fuelsRef = db.collection("fuels");
-  result.fuels.forEach((fuel) => {
-    fuelsRef.doc(`${fuel.FuelId}`).set(fuel);
-  })
 
-  const sitesRef = db.collection("sites");
-  result.sites.forEach(site => {
-    site.geohash = geofire.geohashForLocation([site.Lat, site.Lng]);
-    sitesRef.doc(`${site.SiteId}`).set(site);
-  })
+  store.storeCollection("sites", sitesParsed, "SiteId");
 
-  const sitesPricesRef = db.collection("sites_prices");
-  result.sites_prices.forEach(sp => {
-    const site = result.sites.find(site => site.SiteId == sp.SiteId);
-    const parsedDate = new Date(sp.TransactionDateUtc).getTime();
-    const key = `${sp.FuelId}_${sp.SiteId}_${parsedDate}`;
 
-    if(site) {
-      sp.geohash = geofire.geohashForLocation([site.Lat, site.Lng])
-    }
+  // todo: for chart / history data only
+  // const sitesPricesRef = db.collection("sites_prices");
+  // result.sites_prices.forEach((sp) => {
+  //   const site = result.sites.find((site) => site.SiteId == sp.SiteId);
+  //   const parsedDate = new Date(sp.TransactionDateUtc).getTime();
+  //   const key = `${sp.FuelId}_${sp.SiteId}_${parsedDate}`;
 
-    sitesPricesRef.doc(`${key}`).set(sp);
-  })
+  //   if (site) {
+  //     sp.Geohash = geofire.geohashForLocation([site.Lat, site.Lng]);
+  //   }
 
+  //   sitesPricesRef.doc(`${key}`).set(sp);
+  // });
+
+  // console.log("INFO", addedInfo)
 });

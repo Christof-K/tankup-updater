@@ -66,6 +66,7 @@ const getAllData = () => {
               });
               break;
             }
+            // todo: chart / history data only
             case "sites_prices": {
               // {
               //   "FuelId": 2,
@@ -78,7 +79,7 @@ const getAllData = () => {
               sitePrices.forEach((sp) => {
                 mergedData.sites_prices.push({
                   ...sp,
-                  TransactionDateUtc: new Date(sp.TransactionDateUtc),
+                  TransactionDate: new Date(sp.TransactionDateUtc),
                 });
               })
               break;
