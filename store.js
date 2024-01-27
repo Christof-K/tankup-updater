@@ -50,10 +50,11 @@ class Store {
 
       console.log(`Inserted ${docs} of ${collectionName}`);
     } else if (this.dbType === "mongodb") {
+      const prefix = "tankup"
       const db = await this.getMongoClient()
-      const collection = db.collection(collectionName);
+      const collection = db.collection(`${prefix}_${collectionName}`);
       await collection.insertMany(data)
-
+      console.log(`Inserted ${data.length} of ${collectionName}`);
 
     } else {
       throw "Unknown dbType!";

@@ -54,4 +54,6 @@ client.getAllData().then((result) => {
   // });
 
   // console.log("INFO", addedInfo)
+
+  console.log("done");
 });
